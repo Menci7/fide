@@ -15,6 +15,12 @@
 		<script src='../vendor/d3-7.8.5/dist/d3.js'></script>
 		<script>
 
+async function tsvgz(input, row) { // loading gzipped tsv files
+	let blob = await d3.blob(`${input}.gz`);
+	const stream = blob.stream().pipeThrough(new DecompressionStream('gzip'));
+	return d3.tsvParse(await new Response(stream).text(), row);
+}
+
 var body = d3.select('body');
 
 const gender = d3.scaleOrdinal()
@@ -22,7 +28,7 @@ const gender = d3.scaleOrdinal()
 	.range(['♂', '♀']);
 
 Promise.all([
-	d3.tsv('../data/ratings.tsv', d => ({
+	tsvgz('../data/ratings.tsv', d => ({
 		id:     +d['#id'],
 		month:   d.month,
 		rating: +d.rating,
